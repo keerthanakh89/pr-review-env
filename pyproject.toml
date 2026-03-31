@@ -1,0 +1,15 @@
+[project]
+name = "pr-review-env"
+version = "0.1.0"
+description = "PR Review OpenEnv Environment"
+authors = [
+    { name = "Keerthana" }
+]
+
+dependencies = [
+    "pydantic",
+    "openenv-core"
+]
+
+[tool.openenv]
+entrypoint = "env:PREnv"

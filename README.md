@@ -1,4 +1,8 @@
-
+---
+title: pr-review-env
+sdk: docker
+app_file: app.py
+---
 # PR Review OpenEnv (FULL FINAL)
 
 ## Features

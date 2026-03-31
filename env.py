@@ -1,16 +1,6 @@
-
 from typing import Dict
-from pydantic import BaseModel
+from models import Observation, Action, Reward
 
-class Observation(BaseModel):
-    pr_diff: str
-
-class Action(BaseModel):
-    action_type: str
-    comment: str
-
-class Reward(BaseModel):
-    score: float
 
 class PREnv:
     def __init__(self):
@@ -32,8 +22,10 @@ class PREnv:
         comment = action.comment.lower()
         expected = self.task["expected_issues"]
 
+        # scoring logic
         score = sum(1 for e in expected if e in comment) / len(expected)
 
+        # penalty for wrong approval
         if action.action_type == "approve" and score < 1:
             score -= 0.3
 
