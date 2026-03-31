@@ -1,0 +1,5 @@
+
+name: pr-review-env
+version: 2.0
+entrypoint: env:PREnv
+description: Full PR review RL environment
