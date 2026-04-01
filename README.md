@@ -10,7 +10,7 @@ pinned: false
 
 # 🤖 PR Review Agent
 
-A free, open-source GitHub Pull Request Review Agent built with **Gradio + GitHub REST API + Docker**, deployed live on **Hugging Face Spaces** — no paid APIs required!
+A free,  open-source GitHub Pull Request Review Agent built with **Gradio + GitHub REST API + Docker**, deployed live on **Hugging Face Spaces** — no paid APIs required!
 
 ---
 
