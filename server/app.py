@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import sys
 import os
+import uvicorn
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from inference import run
 
@@ -42,3 +43,9 @@ def step(req: StepRequest):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+def main():
+    uvicorn.run(app, host="0.0.0.0", port=7860)
+
+if __name__ == "__main__":
+    main()
