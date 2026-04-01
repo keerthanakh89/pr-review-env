@@ -35,4 +35,4 @@ iface = gr.Interface(
     description="Click run to evaluate PR review tasks"
 )
 
-iface.launch()
+iface.launch(server_name="0.0.0.0", server_port=7860)
