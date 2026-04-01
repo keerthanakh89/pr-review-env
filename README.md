@@ -181,8 +181,8 @@ To get a free GitHub token:
       Project Lead & Developer
     </td>
     <td align="center">
-      <a href="https://github.com/<Harshagowdasv>">
-        <img src="https://github.com/<Harshagowdasv>.png" width="100px;" alt="Harsha"/>
+      <a href="https://github.com/Harshagowdasv">
+        <img src="https://github.com/Harshagowdasv.png" width="100px;" alt="Harsha"/>
         <br />
         <b>Harsha Gowda S V</b>
       </a>
