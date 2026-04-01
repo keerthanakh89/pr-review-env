@@ -1,56 +1,52 @@
-from env import PREnv, Action
-from tasks import TASKS
+import requests
+import re
 
+def parse_pr_url(pr_url):
+    pattern = r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)"
+    match = re.match(pattern, pr_url.strip())
+    if not match:
+        return None, None, None
+    return match.group(1), match.group(2), match.group(3)
 
-# -------- Smart Rule-Based Agent --------
-def simple_pr_agent(task):
-    pr = task["pr_diff"].lower()
-    issues = task["expected_issues"]
+def run(pr_url: str, token: str = None) -> dict:
+    owner, repo, pr_number = parse_pr_url(pr_url)
+    if not owner:
+        return {"error": "Invalid PR URL"}
 
-    comment = "PR Review:\n"
+    headers = {"Accept": "application/vnd.github+json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
 
-    # Try to infer issues from code (makes it look intelligent)
-    if "none" in pr:
-        comment += "- Missing null check\n"
+    pr_res = requests.get(
+        f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}",
+        headers=headers
+    )
+    if pr_res.status_code != 200:
+        return {"error": f"GitHub API error: {pr_res.status_code}"}
 
-    if "for" in pr and "range" in pr:
-        comment += "- Possible performance issue (nested loops)\n"
+    files_res = requests.get(
+        f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files",
+        headers=headers
+    )
 
-    if "=" in pr:
-        comment += "- Improve variable naming\n"
+    pr_data = pr_res.json()
+    files_data = files_res.json() if files_res.status_code == 200 else []
 
-    comment += "- Add proper comments/documentation\n"
-
-    # Ensure expected issues are included (for scoring)
-    for issue in issues:
-        if issue not in comment.lower():
-            comment += f"- {issue}\n"
-
-    return comment
-
-
-# -------- Main Execution --------
-def run():
-    env = PREnv()
-
-    for task in TASKS:
-        print(f"\nRunning task: {task['name']}")
-
-        env.reset(task)
-
-        # Use rule-based agent
-        comment = simple_pr_agent(task)
-
-        action = Action(
-            action_type="comment",
-            comment=comment
-        )
-
-        _, reward, _, _ = env.step(action)
-
-        print("Review Comment:\n", comment)
-        print("Score:", reward.score)
-
-
-if __name__ == "__main__":
-    run()
+    return {
+        "title": pr_data.get("title"),
+        "author": pr_data.get("user", {}).get("login"),
+        "status": pr_data.get("state"),
+        "files_changed": len(files_data),
+        "additions": sum(f.get("additions", 0) for f in files_data),
+        "deletions": sum(f.get("deletions", 0) for f in files_data),
+        "files": [
+            {
+                "filename": f["filename"],
+                "status": f["status"],
+                "additions": f["additions"],
+                "deletions": f["deletions"],
+                "patch": f.get("patch", "")[:500]
+            }
+            for f in files_data
+        ]
+    }

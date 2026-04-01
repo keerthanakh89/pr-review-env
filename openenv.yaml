@@ -1,5 +1,7 @@
-
 name: pr-review-env
-version: 2.0
-entrypoint: env:PREnv
-description: Full PR review RL environment
+version: "1.0"
+description: A PR Review Agent environment using GitHub REST API
+entrypoint: app.py
+endpoints:
+  reset: /reset
+  step: /step
