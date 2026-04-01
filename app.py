@@ -7,10 +7,10 @@ from pydantic import BaseModel
 import uvicorn
 from inference import run
 
-# ── FastAPI app with OpenEnv endpoints ──────────────────────────────
-api = FastAPI()
+# ── FastAPI ──────────────────────────────────────────────────────────
+app = FastAPI()
 
-api.add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
@@ -23,13 +23,13 @@ class StepRequest(BaseModel):
 
 env_state = {"last_pr": None, "result": None}
 
-@api.post("/reset")
+@app.post("/reset")
 def reset():
     env_state["last_pr"] = None
     env_state["result"] = None
     return {"status": "reset", "observation": "Environment reset. Ready for PR review."}
 
-@api.post("/step")
+@app.post("/step")
 def step(req: StepRequest):
     result = run(req.pr_url, req.token)
     env_state["last_pr"] = req.pr_url
@@ -41,7 +41,7 @@ def step(req: StepRequest):
         "info": {}
     }
 
-@api.get("/health")
+@app.get("/health")
 def health():
     return {"status": "ok"}
 
@@ -51,10 +51,8 @@ def review_pr(pr_url, github_token):
         return "⚠️ Please enter a GitHub PR URL."
     token = github_token.strip() if github_token.strip() else None
     result = run(pr_url, token)
-
     if "error" in result:
         return f"❌ {result['error']}"
-
     output = []
     output.append(f"📌 PR: {result['title']}")
     output.append(f"👤 Author: {result['author']}")
@@ -62,7 +60,6 @@ def review_pr(pr_url, github_token):
     output.append(f"📁 Files Changed: {result['files_changed']}")
     output.append(f"➕ Additions: {result['additions']}  ➖ Deletions: {result['deletions']}")
     output.append("\n" + "="*50)
-
     for f in result["files"]:
         status_icon = {"added": "🟢", "removed": "🔴", "modified": "🟡", "renamed": "🔵"}.get(f["status"], "⚪")
         output.append(f"\n{status_icon} {f['filename']} [{f['status']}]")
@@ -71,7 +68,6 @@ def review_pr(pr_url, github_token):
             output.append("   Diff Preview:")
             for line in f["patch"].split("\n")[:15]:
                 output.append(f"   {line}")
-
     return "\n".join(output)
 
 with gr.Blocks(title="PR Review Agent") as demo:
@@ -85,8 +81,10 @@ with gr.Blocks(title="PR Review Agent") as demo:
     btn.click(fn=review_pr, inputs=[pr_input, token_input], outputs=output)
 
 # ── Mount Gradio into FastAPI ────────────────────────────────────────
-from gradio.routes import mount_gradio_app
-app = mount_gradio_app(api, demo, path="/")
+app = gr.mount_gradio_app(app, demo, path="/")
+
+def main():
+    uvicorn.run("app:app", host="0.0.0.0", port=7860)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+    main()
