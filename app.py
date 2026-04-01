@@ -1,39 +1,19 @@
 import gradio as gr
-from env import PREnv, Action
-from tasks import TASKS
 
+def review_pr(pr_url):
+    if not pr_url.strip():
+        return "⚠️ Please enter a PR URL."
+    return f"✅ PR Review Agent received: {pr_url}\n\n(Agent logic goes here)"
 
-def run_all_tasks():
-    env = PREnv()
-    output = ""
+with gr.Blocks(title="PR Review Agent") as demo:
+    gr.Markdown("## 🤖 PR Review Agent")
+    pr_input = gr.Textbox(label="GitHub PR URL", placeholder="https://github.com/owner/repo/pull/123")
+    output = gr.Textbox(label="Review Output", lines=10)
+    btn = gr.Button("Review PR")
+    btn.click(fn=review_pr, inputs=pr_input, outputs=output)
 
-    for task in TASKS:
-        env.reset(task)
-
-        comment = "PR Review:\n"
-        for issue in task["expected_issues"]:
-            comment += f"- {issue}\n"
-
-        action = Action(
-            action_type="comment",
-            comment=comment
-        )
-
-        _, reward, _, _ = env.step(action)
-
-        output += f"\nTask: {task['name']}\n"
-        output += f"{comment}\nScore: {reward.score}\n\n"
-
-    return output
-
-
-iface = gr.Interface(
-    fn=run_all_tasks,
-    inputs=[],
-    outputs="text",
-    title="PR Review Agent",
-    description="Click run to evaluate PR review tasks"
-)
-
-# IMPORTANT LINE
-iface.launch(server_name="0.0.0.0", server_port=7860)
+if __name__ == "__main__":
+    demo.launch(
+        server_name="0.0.0.0",   # ← CRITICAL: bind to all interfaces
+        server_port=7860          # ← CRITICAL: must be exactly 7860
+    )
