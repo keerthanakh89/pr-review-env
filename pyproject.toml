@@ -1,15 +1,19 @@
 [project]
 name = "pr-review-env"
-version = "0.1.0"
-description = "PR Review OpenEnv Environment"
-authors = [
-    { name = "Keerthana" }
-]
-
+version = "1.0.0"
+description = "PR Review Agent OpenEnv Environment"
+requires-python = ">=3.11"
 dependencies = [
+    "gradio>=4.0.0",
+    "fastapi",
+    "uvicorn",
+    "requests",
     "pydantic",
-    "openenv-core"
 ]
 
-[tool.openenv]
-entrypoint = "env:PREnv"
+[project.scripts]
+server = "server.app:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
