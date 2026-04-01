@@ -9,10 +9,11 @@ dependencies = [
     "uvicorn",
     "requests",
     "pydantic",
+    "openenv-core>=0.2.0",
 ]
 
 [project.scripts]
-server = "server.app:app"
+server = "server.app:main"
 
 [build-system]
 requires = ["hatchling"]
