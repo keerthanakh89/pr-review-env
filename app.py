@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 from inference import run
-
 # ── FastAPI ──────────────────────────────────────────────────────────
 app = FastAPI()
 
